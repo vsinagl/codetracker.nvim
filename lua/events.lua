@@ -22,13 +22,20 @@ local function stop_timer()
 end
 
 local function get_repo_info()
-    local result = vim.fn.systemlist("git rev-parse --is-inside-work-tree")[1]
-	local remote_url = "nil"
+    local repo = vim.fn.systemlist("git rev-parse --is-inside-work-tree")[1]
 	local branch = "nil"
-    if result == true then
+	local remote_url = "nil"
+	if repo then
 		remote_url =  vim.fn.systemlist("git config --get remote.origin.url")[1]
+		if not remote_url then 
+			remote_url = "nil"
+		end
+		branch = vim.fn.systemlist("git branch --show-current")[1]
+		if not branch then
+			branch = "nil"
+		end
 	end
-	return result, remote_url, branch
+	return repo, remote_url, branch
 end
 
 local function extract_filetype(text)

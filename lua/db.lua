@@ -120,7 +120,6 @@ local function format_values(values)
 end
 
 function Database:insert_into(table_name, columns, values)
-	print("input values: ",values)
 	local succes, result = pcall(function()
 		local sql_query = string.format(
 			"INSERT INTO %s (%s) VALUES (%s);",
