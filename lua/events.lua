@@ -1,16 +1,12 @@
 local config = require("config")
 local Database = require("db")
 
---NOTE: main module with record
 local M = {}
 M.inactivity_timer = nil
 M.db = Database.new(config.dbname)
-M.session_cols =  {"buffer_id", "filepath", "filetype", "start_time", "end_time", "duration", "is_repo", "remote_url", "branch"}
+M.session_cols =  {"buffer_id", "filepath", "filetype", "start_time", "end_time", "is_repo", "remote_url", "branch"}
 M.session_vals = {}
 
--- event variables
--- local inactivity_timer = nil
--- local last_activity = nil -- time in UNIX format
 
 local function stop_timer()
 	if not M.inactivity_timer then
@@ -22,10 +18,16 @@ local function stop_timer()
 end
 
 local function get_repo_info()
-    local repo = vim.fn.systemlist("git rev-parse --is-inside-work-tree")[1]
-	local branch = "nil"
-	local remote_url = "nil"
-	if repo then
+	local repo = vim.fn.systemlist("git rev-parse --is-inside-work-tree")[1]
+	
+	local branch = nil
+	local remote_url = nil
+	-- debug
+	-- fatal:
+	--print(repo)
+	if string.sub(repo, 4) == 'fatal'  then
+		return false, false, false
+	else
 		remote_url =  vim.fn.systemlist("git config --get remote.origin.url")[1]
 		if not remote_url then 
 			remote_url = "nil"
@@ -34,8 +36,8 @@ local function get_repo_info()
 		if not branch then
 			branch = "nil"
 		end
+	return true, remote_url, branch
 	end
-	return repo, remote_url, branch
 end
 
 local function extract_filetype(text)
@@ -52,16 +54,15 @@ local function set_values()
 	M.session_vals[1] = vim.api.nvim_get_current_buf() -- buff_id
 	M.session_vals[2] = vim.api.nvim_buf_get_name(M.session_vals[1]) --filepath
 	M.session_vals[3] = extract_filetype(M.session_vals[2]) --filetype
-	M.session_vals[7], M.session_vals[8], M.session_vals[9] = get_repo_info() --is repo
+	M.session_vals[6], M.session_vals[7], M.session_vals[8] = get_repo_info() --is repo
 
 end
 
 local function create_session_record()
 	stop_timer()
 	M.session_vals[5] = os.time() --end time
-	M.session_vals[6] = M.session_vals[5] - M.session_vals[4] --duration
+--	M.session_vals[6] = M.session_vals[5] - M.session_vals[4] --duration
 	M.db:insert_into("sessions", M.session_cols, M.session_vals)
-	--print("suck it, jing jang\n")
 end
 
 local function reset_timer()
@@ -81,7 +82,6 @@ local function buffer_change()
 	end
 	--minimal inactivity
 	if (os.time() - M.session_vals[4] ) < config.min_activity then
-		print("fcking time: ", (os.time()-M.session_vals[4]) < config.min_activity)
 		stop_timer()
 		return
 	end
@@ -108,7 +108,6 @@ local function set_buffer_tracker()
 end
 
 function M.set_events()
-	print(#M.session_vals)
 	reset_timer()
 	set_buffer_tracker()
 	set_inactivity_tracker()

@@ -3,7 +3,6 @@ local sqlite3 = require("sqlite3")
 local  Database = {}
 Database.__index = Database
 
---initializing the db --> if db not exists, creating db and tables
 local function db_connect(dbname)
 	local db, err =  sqlite3.open(dbname)
 	if not db then
@@ -31,7 +30,6 @@ function Database:close()
 	end
 end
 
---not used in  the code, problem white sqlite stmt
 function Database:prepare_entry()
 	local sql_query = "INSERT INTO sessions (name, start_time, end_time, duration) VALUES (?, ?, ?, ?);"
 	local stmt, err = self.con:prepare(sql_query)
