@@ -34,7 +34,11 @@
         1. option is to let it be as it is and filter this fields in query
         2. option is to don't save the record when filetype is nil
         3. options is to add special filename when the filetype is nil (as popup window for example)
-- [ ] README.md
+- [x] simple README.md with structure
+- [ ] create db
+    - put create_db.lua into db.lua
+    - test db creation
+- [ ]  remote repo and working MVP
 
 - [ ] foregin key remote repo  pro primary key v projects ?
     - pridat remote repo jako foregin key a neukladat tak dlouho adresu stringu ale pouze ID projektu.
