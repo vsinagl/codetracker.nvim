@@ -20,22 +20,21 @@
 - [x] sql Database class with apropriate functions
 - [x] unit test for Database methods
 - [x] event function
-- [-] testing the event function
-    - like i'am testing with normal plugin usage, however i don't write any unitests for it.
-    - *this function get all the buffer information and store them into table*
+- [x] testing the function
 - [x] session_input function
     - input is the table with all the session stats, this will run a query that will populate the main table
 
+
 # ToDo
-- [ ] -nacitani gitacke slozky
-- [ ] - potom co se session vypne by se z end tajmu melo odecist 20s (resp. doba inaktivity)
-- [ ] error when creating new db from scratch !
-    - does it actually throw errors even in unitests ? 
-- [ ]  NULL values inside the testing_db, how does they happen ?
+- [x] -nacitani gitacke slozky
+- [x] - potom co se session vypne by se z end tajmu melo odecist 20s (resp. doba inaktivity)
+- [x] error when creating new db from scratch !
+- [x]  NULL values inside the testing_db, how does they happen ?
     - it's from the telescope buffers --> how to solve it ?
         1. option is to let it be as it is and filter this fields in query
         2. option is to don't save the record when filetype is nil
         3. options is to add special filename when the filetype is nil (as popup window for example)
+- [ ] README.md
 
 - [ ] foregin key remote repo  pro primary key v projects ?
     - pridat remote repo jako foregin key a neukladat tak dlouho adresu stringu ale pouze ID projektu.
@@ -58,7 +57,7 @@ SOLVED
 
 2. [-] wrong git repository:
     -  ✅ problem with repo as string solved with substring
-    -  ❌ problem pokud nvim otevru mimo root projektu (napr v home ~). --> prikaz vim.fn("gir -rev-parse totiz bezi asi uvnitr slozky ze ktere byl nvim otevren ?
+    -   ✅ __SOLVED__ problem pokud nvim otevru mimo root projektu (napr v home ~). --> prikaz vim.fn("gir -rev-parse totiz bezi asi uvnitr slozky ze ktere byl nvim otevren ?
         - zvlastni ale je ze defacto vsechny jako is_repo se nahraje hodnota true a do ostatnich fatal ?
 
 # TEST
@@ -68,6 +67,18 @@ SOLVED
 
 # ZMENY !!
 - databazove pole duration se jiz nepouziva: je redundatni (dopocte se ze start_time a end_time pomoci quericek
+
+
+# WORK LOGS
+6.9 ✅ - casy, mam bordel v jednotkach (viz config -> inactivity period a min_inactivity) neco je v ms, neco v s --> sjednotit
+       - rozdeleni create records na dve funkce -> jedna se sepne po vyprseni limitu inactivity --> zkontrolovat a otestovat ze funguje
+       - hodnoty kdy end_time - start_time < 1 jsou nepripustne --> zkontrolovat
++++++++++++
+6.9 - testovani,  hlaseni chyb
+    - code reporting
+++++++++++
+12.9 - testovani, inicializace databaze, tabulka repos a automaticka integrace --> repo pomoci ciziho klice
+++++++
 
 
 
