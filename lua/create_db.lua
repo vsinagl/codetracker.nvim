@@ -1,8 +1,37 @@
 
-local sqlite3 = require("sqlite3")
+local sqlite3 = require("lsqlite3")
+local Database = require("db")
 
 --NOTE: db init
 local M = {}
+
+local languages = {
+    {".lua", "Lua", true},
+    {".py", "Python", true},
+    {".js", "JavaScript", true},
+    {".java", "Java", true},
+    {".cs", "C#", true},
+    {".cpp", "C++", true},
+    {".rb", "Ruby", true},
+    {".go", "Go", true},
+    {".swift", "Swift", true},
+    {".kt", "Kotlin", true},
+    {".php", "PHP", true},
+    {".ts", "TypeScript", true},
+    {".rs", "Rust", true},
+    {".m", "Objective-C", true},
+    {".scala", "Scala", true},
+    {".pl", "Perl", true},
+    {".r", "R", true},
+    {".dart", "Dart", true},
+    {".hs", "Haskell", true},
+    {".ex", "Elixir", true},
+    {".clj", "Clojure", true},
+    {".m", "MATLAB", true},
+    {".vba", "VBA", true},
+    {".groovy", "Groovy", true},
+    {".sh", "Shell", true}
+}
 
 local function table_exists(db, table_name)
 	local result = pcall(function()
@@ -84,6 +113,7 @@ local function create_filetypes(db)
 	local query = [[
 		CREATE TABLE filetypes(
 		  id INTEGER PRIMARY KEY AUTOINCREMENT,
+      extension TEXT NOT NULL,
 		  filetype TEXT,
 		  is_lang BOOLEAN,
 		  lang_type TEXT
@@ -93,16 +123,24 @@ local function create_filetypes(db)
 	if succes == nil then
 		error("error in creating filetypes table: " .. err_msq)
 	end
-	succes = db:insert_into(
-		"filetypes",
-		{"filetype", "is_lang", "lang_type"},
-		{"Lua", true,  "lightweight, high-level, multi-paradigm"}
-	)
 end
 
+local function insert_languages(database)
+  local succes = database:insert_into(
+    "filetypes",
+    {"extension", "filetype", "lang_type"},
+    languages
+  )
+  if succes == nil then
+    vim.err_writeln("error in inserting languages")
+  end
+end
+
+
 function M.db_init(dbname)
-	print("DBNAME: " .. dbname)
-	local db, err_msg = sqlite3.open(dbname)
+  -- local db, err_msg = sqlite3.open(dbname)
+  database = Database.new(dbname)
+  local db = database.con
 	if not db then
 		error("error in creating or opening database, error: " .. err_msg)
 	end
@@ -114,11 +152,12 @@ function M.db_init(dbname)
 	end
 	if table_exists(db, "filetypes") == false then
 		create_filetypes(db)
+    insert_languages(database)
 	end
 	if table_exists(db, "projects") == false then
 		create_projects(db)
 	end
-	db.close(db)
+  return database
 end
 
 return M

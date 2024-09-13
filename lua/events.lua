@@ -4,7 +4,8 @@ local Database = require("db")
 local M = {}
 M.inactivity_timer = nil
 M.db = Database.new(config.dbname)
-M.session_cols =  {"buffer_id", "filepath", "filetype", "start_time", "end_time", "is_repo", "remote_url", "branch"}
+--M.session_cols =  {"buffer_id", "filepath", "filetype", "start_time", "end_time", "is_repo", "remote_url", "branch"}
+M.session_cols =  {"buffer_id", "filepath", "filetype_id", "repo_id", "start_time", "end_time"}
 M.session_vals = {}
 
 
@@ -67,6 +68,30 @@ local function set_values()
 	M.session_vals[6], M.session_vals[7], M.session_vals[8] = get_repo_info() --is repo
 end
 
+-- function that returns filetype id from filetabes table or create a new filetype if there is no such filetype
+local function get_or_insert_filetype(extension)
+    local result = M.db:select_from("filetypes", {"id"}, {extension = extension})
+    if #result > 0 then
+        return result[1].id
+    else
+        M.db:insert_into("filetypes", {"extension", "is_lang"}, {extension, true})
+        vim.api.nvim_err_writeln("last insert id: ", M.db.con:last_insert_rowid())
+        return M.db.con:last_insert_rowid()
+    end
+end
+
+-- fuction that returns repo id from repos table or create a new repo if there is no such repo
+local function get_or_insert_repo(is_repo, remote_url, branch)
+    local result = M.db:select_from("repos", {"id"}, {is_repo = is_repo, remote_url = remote_url, branch = branch})
+    if #result > 0 then
+        return result[1].id
+    else
+        M.db:insert_into("repos", {"is_repo", "remote_url", "branch"}, {is_repo, remote_url, branch})
+        vim.api.nvim_err_writeln("last insert id: ", M.db.con:last_insert_rowid())
+        return M.db.con:last_insert_rowid()
+    end
+end
+
 
 local function create_session_record()
 	clear_timer()
@@ -75,7 +100,9 @@ local function create_session_record()
 	if not M.session_vals[1] or M.session_vals[2] == "" then
 		return
 	end
-	M.db:insert_into("sessions", M.session_cols, M.session_vals)
+  local filetype_id = get_or_insert_filetype(M.session_vals[3])
+  local repo_id = get_or_insert_repo(M.session_vals[6], M.session_vals[7], M.session_vals[8])
+  M.db:insert_into("sessions", M.session_cols, {M.session_vals[1], M.session_vals[2], filetype_id, repo_id, M.session_vals[4], M.session_vals[5]})
 end
 
 
@@ -92,7 +119,10 @@ local function create_session_record_inactivity()
 	if not M.session_vals[1] or M.session_vals[2] == "" then
 		return
 	end
-	M.db:insert_into("sessions", M.session_cols, M.session_vals)
+	-- delete meM.db:insert_into("sessions", M.session_cols, M.session_vals)
+  local filetype_id = get_or_insert_filetype(M.session_vals[3])
+  local repo_id = get_or_insert_repo(M.session_vals[6], M.session_vals[7], M.session_vals[8])
+  M.db:insert_into("sessions", M.session_cols, {M.session_vals[1], M.session_vals[2], filetype_id, repo_id, M.session_vals[4], M.session_vals[5]})
 end
 
 
@@ -129,9 +159,9 @@ local function on_cursor_move()
 	M.inactivity_timer = nil
 	vim.api.nvim_create_autocmd({
 		"CursorMoved", "CursorMovedI",
-    	"VimEnter","ModeChanged",
+      "VimEnter","ModeChanged",
     	"TextChanged", "TextChangedI", "TextChangedP",
-    	"BufEnter"
+    	"BufEnter", "BufWritePost"
 		},
 		{
 		callback = reset_timer,

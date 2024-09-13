@@ -1,4 +1,4 @@
-local sqlite3 = require("sqlite3")
+local sqlite3 = require("lsqlite3")
 
 local  Database = {}
 Database.__index = Database
@@ -67,30 +67,6 @@ local function quote(value)
 	return "\'" .. value .. "\'"
 end
 
---[[
---
-local function format_values(value)
-	local formated_value = {}
-	--for _,value in ipairs(values) do
-	if type(value) == "number" then
-		table.insert(formated_values, tostring(value))
-	elseif type(value) == "string" then
-		table.insert(formated_values, quote(value))
-	elseif type(value) == "boolean" then
-		if value == true then
-			table.insert(formated_values, tostring(1))
-		else
-			table.insert(formated_values, tostring(0))
-		end
-	elseif type(value) == "nil" then
-		table.insert(formated_values, "NULL")
-	else
-		vim.api.nvim_err_writeln("Unsupported data type: " .. type(value))
-	end
-	--end
-	return table.concat(formated_values, ", ")
-end
---]]
 
 local function format_values(values)
 	local formated_values = {}
@@ -136,7 +112,7 @@ function Database:__insert(table_name, columns, values)
 		return suc,err
 	end)
 	if not success then
-		vim.api.nvim_err_writeln("Database.insert_into() error")
+    vim.api.nvim_err_writeln("Database.insert_into() error")
 		return nil
 	end
 	print("__insert returiing: ", success, result)
@@ -155,6 +131,36 @@ function Database:insert_into(table_name, columns, values)
 		success, result = self:__insert(table_name, columns, values)
 	end
 	return success, result
+end
+
+function Database:select_from(table_name, columns, where)
+  local success, result = pcall(function()
+    local where_clause = ""
+    if where then
+      local where_conditions = {}
+      for key, value in pairs(where) do
+        table.insert(where_conditions, key .. " = " .. quote(value))
+      end
+      where_clause = " WHERE " .. table.concat(where_conditions, " AND ")
+    end
+    local sql_query = string.format(
+      "SELECT %s FROM %s %s;",
+      table.concat(columns, ", "),
+      table_name,
+      where_clause
+    )
+    vim.api.nvim_err_writeln(sql_query)
+    local rows = {}
+    for row in self.con:nrows(sql_query) do
+      table.insert(rows, row)
+    end
+    return rows
+  end)
+  if not success then
+    vim.api.nvim_err_writeln("Database.select_from() error: " .. result)
+    return nil
+  end
+  return result
 end
 
 return Database
