@@ -76,9 +76,9 @@ local function get_or_insert_filetype(extension)
       if #result > 0 then
           return result[1].id
       else
-          M.db:insert_into("filetypes", {"extension", "is_lang"}, {extension_mod, true})
-  
-          vim.api.nvim_err_writeln("last insert id: " .. tostring(M.db.con:last_insert_rowid()))
+          M.db:insert_into("filetypes",
+			{"extension", "is_lang"},
+			{extension_mod, true})
           return M.db.con:last_insert_rowid()
       end
   end)
