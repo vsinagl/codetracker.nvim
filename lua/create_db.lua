@@ -1,8 +1,6 @@
 
--- local sqlite3 = require("lsqlite3")
 local Database = require("db")
 
---NOTE: db init
 local M = {}
 
 local languages = {
@@ -35,30 +33,17 @@ local languages = {
 
 local function table_exists(db, table_name)
 	local result = pcall(function()
-		--for row in db:rows("SELECT * FROM sqlite_master") do
 		for row in db:rows(".tables") do
 		for _, v in pairs(row) do
-			print(v)
 			if (v == table_name) then
 				return true
 			end
         	    end
         	end
-        	print("No rows found in sqlite_master")
         	return false
     end)
-	--[[NOTE: for debuging
-	print("sqlite_master query success:", success)
-	print("sqlite_master query result:", result)
-	--]]
 	return result
 end
-
---[[NOTE: repo cols:
-		  is_repo BOOLEAN,
-		  remote_url TEXT,
-		  branch TEXT,
--]]
 
 local function create_sessions(db)
 	local query = [[

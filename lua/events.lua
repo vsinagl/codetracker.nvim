@@ -145,9 +145,7 @@ end
 local function create_session_record_inactivity()
 	clear_timer()
 	M.session_vals[5] = os.time() - config.inactivity_period --end time
-	print("difference: ", M.session_vals[5] - M.session_vals[4])
 	if M.session_vals[5] - M.session_vals[4] < config.min_activity then
---		vim.api.nvim_err_writeln("session duration < minimal activity, duration: " .. tostring(M.session_vals[5] - M.session_vals[4]))
 		return
 	end
 	-- nvim internal buffers (telescope for example) don't have filetypes

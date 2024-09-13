@@ -1,6 +1,6 @@
 --defualt cofing for plugin
 local M = {
-	inactivity_period = 8, -- inactivity period in miliseconds, after this period event for saving session into db will be activated
+	inactivity_period = 100, -- inactivity period in miliseconds, after this period event for saving session will be triggered
 	min_activity = 2, -- minimal duration of session that will be stored into database
 	-- min activity time is for quick moving from one buffer to another --> no data storing in this case
 	database_name = "codetrackerdb"
