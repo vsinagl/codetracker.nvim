@@ -1,2 +1,7 @@
 *.vim
+*.db
+*_db
+codetrackerdb
+DBTEST2
+DBTEST
 

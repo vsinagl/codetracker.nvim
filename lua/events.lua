@@ -3,8 +3,9 @@ local Database = require("db")
 
 local M = {}
 M.inactivity_timer = nil
-M.db = Database.new(config.dbname)
-M.session_cols =  {"buffer_id", "filepath", "filetype", "start_time", "end_time", "is_repo", "remote_url", "branch"}
+M.db = "nil"
+--M.session_cols =  {"buffer_id", "filepath", "filetype", "start_time", "end_time", "is_repo", "remote_url", "branch"}
+M.session_cols =  {"buffer_id", "filepath", "filetype_id", "repo_id", "start_time", "end_time"}
 M.session_vals = {}
 
 
@@ -64,7 +65,48 @@ local function set_values()
 	M.session_vals[1] = vim.api.nvim_get_current_buf() -- buff_id
 	M.session_vals[2] = vim.api.nvim_buf_get_name(M.session_vals[1]) --filepath
 	M.session_vals[3] = extract_filetype(M.session_vals[2]) --filetype
-	M.session_vals[6], M.session_vals[7], M.session_vals[8] = get_repo_info() --is repo
+	M.session_vals[6], M.session_vals[7], M.session_vals[8] = get_repo_info() --is repo, remote_url, branch
+end
+
+-- function that returns filetype id from filetabes table or create a new filetype if there is no such filetype
+local function get_or_insert_filetype(extension)
+  local success, result = pcall(function()
+      local extension_mod = "." .. extension
+      local result = M.db:select_from("filetypes", {"id"}, {extension = extension_mod})
+      if #result > 0 then
+          return result[1].id
+      else
+          M.db:insert_into("filetypes", {"extension", "is_lang"}, {extension_mod, true})
+  
+          vim.api.nvim_err_writeln("last insert id: " .. tostring(M.db.con:last_insert_rowid()))
+          return M.db.con:last_insert_rowid()
+      end
+  end)
+  if not success then
+    return nil
+  end
+  return result
+end
+
+-- fuction that returns repo id from repos table or create a new repo if there is no such repo
+local function get_or_insert_repo(is_repo, remote_url, branch)
+  local succes, result = pcall(function()
+      local result = M.db:select_from("repos",
+          {"id"},
+          {is_repo = is_repo, remote_url = remote_url, branch = branch})
+      if #result > 0 then
+          return result[1].id
+      else
+          M.db:insert_into("repos",
+              {"is_repo", "remote_url", "branch"},
+              {is_repo, remote_url, branch})
+          return M.db.con:last_insert_rowid()
+      end
+  end)
+  if succes == false then
+    return nil
+  end
+  return result
 end
 
 
@@ -75,7 +117,28 @@ local function create_session_record()
 	if not M.session_vals[1] or M.session_vals[2] == "" then
 		return
 	end
-	M.db:insert_into("sessions", M.session_cols, M.session_vals)
+
+  local filetype_id = get_or_insert_filetype(M.session_vals[3])
+  if filetype_id == nil then
+    vim.api.nvim_err_writeln("Error: filetype id == nil")
+    return
+  end
+
+  if M.session_vals[6] ~= "nil" then
+    local repo_id = get_or_insert_repo(M.session_vals[6], M.session_vals[7], M.session_vals[8])
+    if not repo_id then
+      vim.api.nvim_err_writeln("Error: repo id == nil")
+      return
+    end
+    M.db:insert_into("sessions",
+           M.session_cols,
+          { M.session_vals[1], M.session_vals[2], filetype_id, repo_id,
+        M.session_vals[4], M.session_vals[5]})
+  else
+    M.db:insert_into("sessions",
+           M.session_cols,
+          { M.session_vals[1], M.session_vals[2], filetype_id, "nil", M.session_vals[4], M.session_vals[5]})
+  end
 end
 
 
@@ -84,7 +147,7 @@ local function create_session_record_inactivity()
 	M.session_vals[5] = os.time() - config.inactivity_period --end time
 	print("difference: ", M.session_vals[5] - M.session_vals[4])
 	if M.session_vals[5] - M.session_vals[4] < config.min_activity then
-		vim.api.nvim_err_writeln("session duration < minimal activity, duration: " .. tostring(M.session_vals[5] - M.session_vals[4]))
+--		vim.api.nvim_err_writeln("session duration < minimal activity, duration: " .. tostring(M.session_vals[5] - M.session_vals[4]))
 		return
 	end
 	-- nvim internal buffers (telescope for example) don't have filetypes
@@ -92,7 +155,27 @@ local function create_session_record_inactivity()
 	if not M.session_vals[1] or M.session_vals[2] == "" then
 		return
 	end
-	M.db:insert_into("sessions", M.session_cols, M.session_vals)
+
+  local filetype_id = get_or_insert_filetype(M.session_vals[3])
+  if filetype_id == nil then
+    vim.api.nvim_err_writeln("Error: filetype id == nil")
+    return
+  end
+
+  if M.session_vals[6] ~= "nil" then
+    local repo_id = get_or_insert_repo(M.session_vals[6], M.session_vals[7], M.session_vals[8])
+    if not repo_id then
+      vim.api.nvim_err_writeln("Error: repo id == nil")
+      return
+    end
+    M.db:insert_into("sessions",
+           M.session_cols,
+          { M.session_vals[1], M.session_vals[2], filetype_id, repo_id, M.session_vals[4], M.session_vals[5]})
+  else
+    M.db:insert_into("sessions",
+           M.session_cols,
+          { M.session_vals[1], M.session_vals[2], filetype_id, "nil", M.session_vals[4], M.session_vals[5]})
+  end
 end
 
 
@@ -129,9 +212,9 @@ local function on_cursor_move()
 	M.inactivity_timer = nil
 	vim.api.nvim_create_autocmd({
 		"CursorMoved", "CursorMovedI",
-    	"VimEnter","ModeChanged",
+      "VimEnter","ModeChanged",
     	"TextChanged", "TextChangedI", "TextChangedP",
-    	"BufEnter"
+    	"BufEnter", "BufWritePost"
 		},
 		{
 		callback = reset_timer,
@@ -154,7 +237,8 @@ local function on_buffer_change()
 end
 
 
-function M.set_events()
+function M.set_events(db)
+  M.db = db
 	on_buffer_change()
 	on_cursor_move()
 end

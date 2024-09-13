@@ -35,9 +35,10 @@
         2. option is to don't save the record when filetype is nil
         3. options is to add special filename when the filetype is nil (as popup window for example)
 - [x] simple README.md with structure
-- [ ] create db
+- [x] create db
     - put create_db.lua into db.lua
     - test db creation
+- [ ] sessions upload - new tables (sessions, projects, repos)
 - [ ]  remote repo and working MVP
 
 - [ ] foregin key remote repo  pro primary key v projects ?
@@ -83,6 +84,19 @@ SOLVED
 ++++++++++
 12.9 - testovani, inicializace databaze, tabulka repos a automaticka integrace --> repo pomoci ciziho klice
 ++++++
+13.9 
+- [x] predal generovani sessionu --> vyziti cizich klicu
+- [x] generaci defaultnich programovacich jazyku do tabulky filetypes
+- [ ] generace most common text files (yaml, md etc..)
+- [x] funkce get id (repos a filetypes) --> pcall a pokud error neukladat zaznam
+- [ ] funkce repos --> pokud repo == nil nehledat klic
+    - otestovani pluginu
+    - merge
+    - pushnuti na github
+++++++
+
+
+
 
 
 
