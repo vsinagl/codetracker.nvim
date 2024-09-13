@@ -68,7 +68,9 @@ local function insert_test()
 
 	local columns = {"buffer_id", "filepath", "filetype_id", "start_time", "end_time"}
 	local values = {
-		3, "~/Code/test/test2.lua", 1, 10123, 10128
+		{13, "~/Code/test/test2.lua", 1, 10123, 10128},
+		{14, "~/Code/test/test2.lua", 1, 10123, 10128},
+		{15, "~/Code/test/test2.lua", 1, 10123, 10128},
 	}
 	succes = db1:insert_into("sessions", columns, values)
 	print_test("db_insert: sessions", succes, "<no message>")
@@ -77,5 +79,5 @@ end
 
 --NOTE: MAIN
 
-create_test()
+--create_test()
 insert_test()

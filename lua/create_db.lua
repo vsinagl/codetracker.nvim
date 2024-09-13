@@ -93,6 +93,11 @@ local function create_filetypes(db)
 	if succes == nil then
 		error("error in creating filetypes table: " .. err_msq)
 	end
+	succes = db:insert_into(
+		"filetypes",
+		{"filetype", "is_lang", "lang_type"},
+		{"Lua", true,  "lightweight, high-level, multi-paradigm"}
+	)
 end
 
 function M.db_init(dbname)

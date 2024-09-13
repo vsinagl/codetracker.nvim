@@ -30,6 +30,7 @@ function Database:close()
 	end
 end
 
+--not used in  the code, problem white sqlite stmt
 function Database:prepare_entry()
 	local sql_query = "INSERT INTO sessions (name, start_time, end_time, duration) VALUES (?, ?, ?, ?);"
 	local stmt, err = self.con:prepare(sql_query)
@@ -37,8 +38,8 @@ function Database:prepare_entry()
 		vim.api.nvim_err_writeln("Error in preparing insert statement: " .. err)
 		return nil
 	end
-	local success, bind_err = stmt:bind_values('Coding lua', '10:45', '10:51', '6')
-	if not success then
+	local successs, bind_err = stmt:bind_values('Coding lua', '10:45', '10:51', '6')
+	if not successs then
 		vim.api.nvim_err_writeln("Error in binding values: " .. bind_err)
 		return nil  -- Return nil to indicate failure
 	end
@@ -117,26 +118,43 @@ local function format_values(values)
 	return table.concat(formated_values, ", ")
 end
 
-function Database:insert_into(table_name, columns, values)
-	local succes, result = pcall(function()
+
+function Database:__insert(table_name, columns, values)
+	print("insert functioon args: ", table_name,columns, values)
+	local success, result = pcall(function()
 		local sql_query = string.format(
 			"INSERT INTO %s (%s) VALUES (%s);",
 			table_name,
 			table.concat(columns, ", "),
 			format_values(values)
-        )
-		local succes, err = self.con:exec(sql_query)	
-		if not succes then
+	)
+		local suc, err = self.con:exec(sql_query)
+		if not suc then
 			vim.api.nvim_err_writeln("Session insert error: " .. err)
-			return nil
+			return suc, err
 		end
-		return succes
+		return suc,err
 	end)
-	if not succes then
+	if not success then
 		vim.api.nvim_err_writeln("Database.insert_into() error")
 		return nil
 	end
-	return result
+	print("__insert returiing: ", success, result)
+	return success, result
+end
+
+
+function Database:insert_into(table_name, columns, values)
+	local success, result
+
+	if #values > 1 and type(values[1]) == "table" then
+		for _, value in ipairs(values) do
+			success, result = self:__insert(table_name, columns, value)
+	end
+	else
+		success, result = self:__insert(table_name, columns, values)
+	end
+	return success, result
 end
 
 return Database
