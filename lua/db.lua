@@ -103,7 +103,6 @@ function Database:__insert(table_name, columns, values)
 			table.concat(columns, ", "),
 			format_values(values)
 	)
-    vim.api.nvim_err_writeln(sql_query)
 		local suc, err = self.con:exec(sql_query)
 		if not suc then
 			vim.api.nvim_err_writeln("Session insert error: " .. err)
@@ -148,7 +147,6 @@ function Database:select_from(table_name, columns, where)
       table_name,
       where_clause
     )
-    vim.api.nvim_err_writeln(sql_query)
     local rows = {}
     for row in self.con:nrows(sql_query) do
       table.insert(rows, row)

@@ -124,7 +124,7 @@ local function create_session_record()
     return
   end
 
-  if M.session_vals[6] == true then
+  if M.session_vals[6] ~= "nil" then
     local repo_id = get_or_insert_repo(M.session_vals[6], M.session_vals[7], M.session_vals[8])
     if not repo_id then
       vim.api.nvim_err_writeln("Error: repo id == nil")
@@ -132,7 +132,8 @@ local function create_session_record()
     end
     M.db:insert_into("sessions",
            M.session_cols,
-          { M.session_vals[1], M.session_vals[2], filetype_id, repo_id, M.session_vals[4], M.session_vals[5]})
+          { M.session_vals[1], M.session_vals[2], filetype_id, repo_id,
+        M.session_vals[4], M.session_vals[5]})
   else
     M.db:insert_into("sessions",
            M.session_cols,
@@ -161,7 +162,7 @@ local function create_session_record_inactivity()
     return
   end
 
-  if M.session_vals[6] == true then
+  if M.session_vals[6] ~= "nil" then
     local repo_id = get_or_insert_repo(M.session_vals[6], M.session_vals[7], M.session_vals[8])
     if not repo_id then
       vim.api.nvim_err_writeln("Error: repo id == nil")
