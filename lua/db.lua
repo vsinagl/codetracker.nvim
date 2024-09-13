@@ -96,7 +96,6 @@ end
 
 
 function Database:__insert(table_name, columns, values)
-	print("insert functioon args: ", table_name,columns, values)
 	local success, result = pcall(function()
 		local sql_query = string.format(
 			"INSERT INTO %s (%s) VALUES (%s);",
@@ -104,6 +103,7 @@ function Database:__insert(table_name, columns, values)
 			table.concat(columns, ", "),
 			format_values(values)
 	)
+    vim.api.nvim_err_writeln(sql_query)
 		local suc, err = self.con:exec(sql_query)
 		if not suc then
 			vim.api.nvim_err_writeln("Session insert error: " .. err)
@@ -115,7 +115,6 @@ function Database:__insert(table_name, columns, values)
     vim.api.nvim_err_writeln("Database.insert_into() error")
 		return nil
 	end
-	print("__insert returiing: ", success, result)
 	return success, result
 end
 

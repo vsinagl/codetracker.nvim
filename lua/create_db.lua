@@ -1,5 +1,5 @@
 
-local sqlite3 = require("lsqlite3")
+-- local sqlite3 = require("lsqlite3")
 local Database = require("db")
 
 --NOTE: db init

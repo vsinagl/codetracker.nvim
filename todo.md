@@ -84,11 +84,17 @@ SOLVED
 ++++++++++
 12.9 - testovani, inicializace databaze, tabulka repos a automaticka integrace --> repo pomoci ciziho klice
 ++++++
-13.9 - predal generovani sessionu --> vyziti cizich klicu
-    - generaci defaultnich programovacich jazyku do tabulky filetypes a take most common text files (yaml, md etc..)
+13.9 
+- [x] predal generovani sessionu --> vyziti cizich klicu
+- [x] generaci defaultnich programovacich jazyku do tabulky filetypes
+- [ ] generace most common text files (yaml, md etc..)
+- [x] funkce get id (repos a filetypes) --> pcall a pokud error neukladat zaznam
+- [ ] funkce repos --> pokud repo == nil nehledat klic
     - otestovani pluginu
     - merge
     - pushnuti na github
+++++++
+
 
 
 

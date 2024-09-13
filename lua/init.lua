@@ -1,21 +1,48 @@
 
-local events = require("events")
-local Database = require("db")
-local db_create = require("create_db")
 local config = require("config")
+local events = require("events")
+local db_create = require("create_db")
+local Database = require("db")
 
 
--- events.db = Database.new(config.dbname)
+local function file_exists(filepath)
+    local file = io.open(filepath, "r")
+    if file then
+        file:close()
+        return true
+    else
+        return false
+    end
+end
 
--- db_init check if database tables are created and if not then it creates them
-local database = db_create.db_init(config.dbname)
+
+print(config.dbname)
+
+local database = nil
+--[[
+local boolean = file_exists(config.dbname)
+if boolean == true then
+  print("boolean = true")
+else
+  print("boolean = false")
+end
+--]]
+
+--check if database exists, run creation subroutine
+if file_exists(config.dbname) == false then
+  print("creating database")
+  database = db_create.db_init(config.dbname)
+else
+  print("database already created !")
+  database = Database.new(config.dbname)
+end
+
+--set events for plugin
 if database then
-  events.db = database
-  events.set_events()
+  events.set_events(database)
 else
   vim.api.write("codetracker plugin: error in database")
 end
 
--- set events for plugin
 
 
