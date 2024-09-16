@@ -2,6 +2,10 @@
 *.db
 *_db
 codetrackerdb
+todo.md
 DBTEST2
 DBTEST
+*.vim
+testing_db
+db_test.lu
 

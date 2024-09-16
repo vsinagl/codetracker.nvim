@@ -1,6 +1,8 @@
+#⚠️p
+-Plugin is still under developement !
 
+# CODETRACKER.NVIM ⏱
 
-# ⏱ CODETRACKER.NVIM ⏱
 #### Simple plugin for tracking your coding records using sqlite and Nvim 
 
 ## What is codetracker ?

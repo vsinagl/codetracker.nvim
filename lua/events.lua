@@ -19,14 +19,32 @@ local function clear_timer()
 end
 --]]
 
+  --get current dir function gets actual buffer directory. Handle special case when buffer terminal
+local function get_current_dir()
+  local current_dir = vim.fn.expand('%:p:h')
+  if string.match(current_dir, 'term://') then
+	local _, _, substring = string.find(current_dir, 'term://(.-)//[^/]*$')
+	  if substring then
+		return substring
+	  end
+  else
+	return current_dir
+  end
+end
+
 -- function that loads repo informations, it returs three variables:
 --	- is_git_repo: boolean
 --	- remote_url: string
 --	- branch_name: string
+
 local function get_repo_info()
-	 -- check if we're in a git repository
-	local current_dir = vim.fn.expand('%:p:h')
+	-- if the buffer is a terminal, return "nil" strings
+	if string.match(M.session_vals[2], "term://") then
+		return "nil", "nil", "nil"
+	end
+	local current_dir = get_current_dir()
 	local original_dir = vim.fn.getcwd()
+	#print("current_dir ", current_dir, "original_dir ", original_dir)
 	-- HACK: changes the local working directory of the current window to current_dir.
 	vim.cmd('lcd ' .. vim.fn.fnameescape(current_dir))
 	local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('^true')
@@ -51,6 +69,9 @@ end
 
 
 local function extract_filetype(text)
+	if string.match(text, "term://") then
+		return "terminal"
+	end
 	local result = vim.split(text, ".", {plain = true})
 	if #result == 0 then
 		return "NULL"
