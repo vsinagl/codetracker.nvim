@@ -50,20 +50,10 @@
 - [ ] tabulka pro manualni trackovani casu stravenych na projektech
 
 
-# Errors 29.8.2024:
-- [x] on inserting:
-Session insert error: [SQLITE][DENY] no such table: sessions(1)
-- cim to muze byt ?
-    1. spatna databaze, volam databazi co neexistuje
-        - zkontrolovat cestu
-    2. pristup ?
-        - chown
-SOLVED 
+# Errors and Issues
+- [ ] Issue: pridat do filetypes textove soubory (txt, md, yaml, toml). Programovaci maji prohozeny sloupec lang_type za is_lang (boolean)
+        - nove zaznamy neznamych filetypu maji mit is_lang = 0 (false) !
 
-2. [-] wrong git repository:
-    -  ✅ problem with repo as string solved with substring
-    -   ✅ __SOLVED__ problem pokud nvim otevru mimo root projektu (napr v home ~). --> prikaz vim.fn("gir -rev-parse totiz bezi asi uvnitr slozky ze ktere byl nvim otevren ?
-        - zvlastni ale je ze defacto vsechny jako is_repo se nahraje hodnota true a do ostatnich fatal ?
 
 # TEST
 - otestovat rychle prepinani  mezi jednotlivmi sessiony, ukladaji se data vporadku ?
@@ -85,14 +75,9 @@ SOLVED
 12.9 - testovani, inicializace databaze, tabulka repos a automaticka integrace --> repo pomoci ciziho klice
 ++++++
 13.9 
-- [x] predal generovani sessionu --> vyziti cizich klicu
-- [x] generaci defaultnich programovacich jazyku do tabulky filetypes
 - [ ] generace most common text files (yaml, md etc..)
-- [x] funkce get id (repos a filetypes) --> pcall a pokud error neukladat zaznam
-- [ ] funkce repos --> pokud repo == nil nehledat klic
-    - otestovani pluginu
-    - merge
-    - pushnuti na github
+SHRNUTI: novy db layout + funkcni vkladani zaznamu
+je treba testovat pri pouzivani a zapisovat bugy
 ++++++
 
 

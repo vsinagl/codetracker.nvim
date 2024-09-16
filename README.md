@@ -11,6 +11,14 @@
 
 ## Installation
 
+### Linux
+- codetracker.nvim is using lsqlite3 lua library
+- you can install it via luarocks
+```bash
+luarocks install lsqlite3
+```
+
+
 ### using packer.nvim
 - TODO:
 
