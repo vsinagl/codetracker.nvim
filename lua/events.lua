@@ -44,7 +44,7 @@ local function get_repo_info()
 	end
 	local current_dir = get_current_dir()
 	local original_dir = vim.fn.getcwd()
-	#print("current_dir ", current_dir, "original_dir ", original_dir)
+	-- print("current_dir ", current_dir, "original_dir ", original_dir)
 	-- HACK: changes the local working directory of the current window to current_dir.
 	vim.cmd('lcd ' .. vim.fn.fnameescape(current_dir))
 	local is_git_repo = vim.fn.system('git rev-parse --is-inside-work-tree 2>/dev/null'):match('^true')
