@@ -15,8 +15,10 @@
 
 This plugin automatically captures your Neovim usage, allowing you to focus on coding while it gathers valuable data. With a local SQLite database, you can perform custom queries to extract the insights that matter most to you.
 
-- NOTE: Plugin is primarly designed to collect data into database. Data retrieval and analysis i let to user, because each user can be interested in different data insights
-- HOWEVER: I'm planning to add commands that will provide some basic and quick analysis inside nvim!
+- NOTE: The plugin is primarily designed to collect and store data into a database. I left data retrieval and analysis to the user because each user may be interested in different data insights.
+- HOWEVER: I'm planning to add commands that will provide some basic and quick analysis inside Neovim!
+
+
 
 # Installation
 
@@ -36,7 +38,7 @@ sqlite3 --version
 # if not then:
 sudo apt-get install -y sqlite3 libsqlite3-dev
 ```
-NOTE: if you have already installed sqlite3 and you are having problem with installing luarocks *(Error: no file sqlite3.h at usr/local/include)* at your system, be sure that you have  **libsqlite3-dev** package installed at your system
+NOTE: if you have already installed sqlite3 and you are having problem with installing luarocks *(Error: no file sqlite3.h at usr/local/include)*, be sure that you have  **libsqlite3-dev** package installed at your system
 
 - installing lsqlite3 using luarocks:
 ```bash
@@ -59,7 +61,6 @@ require("lazy").setup({
 ```
 
 ## Installing plugin using packer.nvim
-TODO:
 
 ``` lua
 use {
@@ -71,10 +72,10 @@ use {
 ```
 
 # Database
-Plugin provide automatic way of storing data into sqlite database. In current plugin state, I left querying databse and data retrieval to the user.
+Plugin provide automatic way of storing data into sqlite database. In current plugin state, I left querying database and data retrieval to the user.
 
 ## Where is my database stored ?
-By default, your databse is stored inside your plugin directory inside lua/ folder.
+By default, your database is stored inside your plugin directory inside lua/ folder.
 If you are using lazy.nvim for example, you can find your plugin at:
 ```
 ~/.local/share/nvim/codetracker.nvim
@@ -83,15 +84,15 @@ and your database will be stored at:
 
 ```
 
-## How does database looks like ?
-Database consist of 4 tables(**buff_sessions**, **filetypes**, **repos**, projects), project tables is not used yet.
-![db_structure](./images/db_structure.png)
+## How does the database look like ?
+Database consists of 4 tables (**buff_sessions**, **filetypes**, **repos**, projects), project tables is not used yet.
+![db_structure](./img/db_structure.png)
 
 ## Some queries examples
 Overview of all sessions, sorted by newest to latest:
-```sqlite3
+```sql
 select
-			t1.buffer_id,
+	t1.buffer_id,
       t1.filepath,
       t2.extension,
       t3.remote_url,
@@ -103,7 +104,7 @@ order by start_time desc;
 ```
 
 How much coding you did each day:
-```sqlite3
+```sql
 select datum, strftime('%H:%M:%S', SUM(end_time - start_time), 'unixepoch')
 AS total_time
 from (select *, date(start_time,'unixepoch') as 'datum' from sessions)
