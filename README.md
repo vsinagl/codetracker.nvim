@@ -27,23 +27,25 @@ This plugin automatically captures your Neovim usage, allowing you to focus on c
 ### Linux (Ubuntu)
 codetracker.nvim is using lsqlite3 lua library
  - you need to have sqlite3 installed on your system
- - you need lsqlite3 lua library installed on your system (you can use luarocks for that)
- ```bash
-sudo apt-get update
-sudo apt-get install luarocks
-```
-- check that you have sqlite3 installed on your system
+
 ```bash
 sqlite3 --version
 # if not then:
 sudo apt-get install -y sqlite3 libsqlite3-dev
 ```
-NOTE: if you have already installed sqlite3 and you are having problem with installing luarocks *(Error: no file sqlite3.h at usr/local/include)*, be sure that you have  **libsqlite3-dev** package installed at your system
+ - you need lsqlite3 lua library installed on your system (you can use luarocks for that)
+ ```bash
+sudo apt-get update
+sudo apt-get install luarocks
+```
 
 - installing lsqlite3 using luarocks:
 ```bash
 luarocks install lsqlite3
 ```
+
+NOTE: if you have already installed sqlite3 and you are having problem with installing lsqlite3 using luarocks *(Error: no file sqlite3.h at usr/local/include)*, be sure that you have  **libsqlite3-dev** package installed at your system
+
 
 ## Installing plugin using lazy.nvim
 - you can use [lazy.nvim](https://github.com/folke/lazy.nvim) to load plugin, add this to your init.lua file
@@ -85,7 +87,7 @@ and your database will be stored at:
 ```
 
 ## How does the database look like ?
-Database consists of 4 tables (**buff_sessions**, **filetypes**, **repos**, projects), project tables is not used yet.
+Database consists of 4 tables (**buff_sessions**, **filetypes**, **repos**, projects), project table is not used yet.
 ![db_structure](./img/db_structure.png)
 
 ## Some queries examples
@@ -98,19 +100,30 @@ select
       t3.remote_url,
       datetime(start_time, 'unixepoch') as 'start_time', strftime('%H:%M:%S', end_time - start_time, 'unixepoch') as 'duration'
 from sessions as t1 
-	inner join filetypes as t2 on t1.filetype_id = t2.id
-	inner join repos as t3 on t1.repo_id = t3.id
+	left join filetypes as t2 on t1.filetype_id = t2.id
+	left join repos as t3 on t1.repo_id = t3.id
 order by start_time desc;
 ```
 
 How much coding you did each day:
 ```sql
-select datum, strftime('%H:%M:%S', SUM(end_time - start_time), 'unixepoch')
-AS total_time
-from (select *, date(start_time,'unixepoch') as 'datum' from sessions)
-group by datum
-order by datum desc;
+select date(start_time,'unixepoch') as 'date', strftime('%H:%M:%S', SUM(end_time - start_time), 'unixepoch') AS total_time
+from sessions
+group by date
+order by date desc;
 ```
+
+How much you did python coding each day (or any other language that you are intersted in)
+```sql
+select date(t1.start_time,'unixepoch') as 'date', t2.extension as 'language', strftime('%H:%M:%S', SUM(t1.end_time - t1.start_time), 'unixepoch') AS total_time
+from sessions as t1
+left join filetypes as t2 on t1.filetype_id = t2.id
+where t2.extension = '.py'
+group by date
+order by date desc;
+
+```
+
 
 # Like it ? Give it a ⭐️
 
